@@ -1,0 +1,45 @@
+id = "azyu.agent-cli"
+name = "Agent CLI"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "Show which CLI runs in each pane as a sidebar token you can colour per runtime"
+platforms = ["linux", "macos"]
+
+[[events]]
+id = "agent-cli-detected"
+on = "pane.agent_detected"
+command = ["python3", "report_cli.py"]
+
+# The name is minted by a different plugin, so agent_detected often fires before
+# there is a name to show. This event carries the pane the rest of the way.
+[[events]]
+id = "agent-cli-changed"
+on = "pane.agent_status_changed"
+command = ["python3", "report_cli.py"]
+
+# The sidebar rows have to exist before the token means anything. Startup, not build:
+# build gets no runtime environment and `herdr plugin link` skips it entirely. A run
+# with nothing to change writes nothing.
+[[startup]]
+command = ["python3", "configure.py"]
+
+[[startup]]
+command = ["python3", "report_cli.py"]
+
+[[actions]]
+id = "refresh"
+title = "Refresh CLI labels"
+contexts = ["workspace"]
+command = ["python3", "report_cli.py"]
+
+[[actions]]
+id = "configure"
+title = "Write sidebar rows into herdr config"
+contexts = ["workspace"]
+command = ["python3", "configure.py"]
+
+[[actions]]
+id = "unconfigure"
+title = "Remove sidebar rows from herdr config"
+contexts = ["workspace"]
+command = ["python3", "configure.py", "--remove"]
